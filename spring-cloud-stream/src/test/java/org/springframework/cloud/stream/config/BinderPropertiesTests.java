@@ -47,11 +47,9 @@ public class BinderPropertiesTests {
 		StaticApplicationContext context = new StaticApplicationContext();
 		DefaultListableBeanFactory bf = (DefaultListableBeanFactory) context.getBeanFactory();
 		BindingServiceProperties bindingServiceProperties = new BindingServiceProperties();
-		bindingServiceProperties.setApplicationContext(context);
 		bf.registerSingleton("bindingServiceProperties", bindingServiceProperties);
 
 		BindingServiceProperties bsp = context.getBean(BindingServiceProperties.class);
-		bsp.setApplicationContext(context);
 		BinderProperties bp = new BinderProperties();
 		bsp.setBinders(Collections.singletonMap("testBinder", bp));
 		bp.getEnvironment().put("spring.rabbitmq.connection-timeout", 2345);

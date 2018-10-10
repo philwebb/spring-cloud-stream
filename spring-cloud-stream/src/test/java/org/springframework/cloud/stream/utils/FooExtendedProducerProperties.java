@@ -16,12 +16,10 @@
 
 package org.springframework.cloud.stream.utils;
 
-import org.springframework.cloud.stream.config.MergableProperties;
-
 /**
  * @author Soby Chacko
  */
-public class FooExtendedProducerProperties implements MergableProperties {
+public class FooExtendedProducerProperties {
 
 	String extendedProperty;
 

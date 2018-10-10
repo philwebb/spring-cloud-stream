@@ -24,20 +24,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.cloud.stream.binder.ProducerProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.integration.support.utils.IntegrationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -49,7 +39,7 @@ import org.springframework.util.Assert;
  */
 @ConfigurationProperties("spring.cloud.stream")
 @JsonInclude(Include.NON_DEFAULT)
-public class BindingServiceProperties implements ApplicationContextAware, InitializingBean {
+public class BindingServiceProperties {
 
 	private static final int DEFAULT_BINDING_RETRY_INTERVAL = 30;
 
@@ -104,10 +94,6 @@ public class BindingServiceProperties implements ApplicationContextAware, Initia
 	 */
 	private int bindingRetryInterval = DEFAULT_BINDING_RETRY_INTERVAL;
 
-	private ConfigurableApplicationContext applicationContext;
-
-	private ConversionService conversionService;
-
 	public Map<String, BindingProperties> getBindings() {
 		return this.bindings;
 	}
@@ -154,41 +140,6 @@ public class BindingServiceProperties implements ApplicationContextAware, Initia
 
 	public void setDynamicDestinations(String[] dynamicDestinations) {
 		this.dynamicDestinations = dynamicDestinations;
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = (ConfigurableApplicationContext) applicationContext;
-		GenericConversionService cs = (GenericConversionService) IntegrationUtils.getConversionService(this.applicationContext.getBeanFactory());
-		if (this.applicationContext.containsBean("spelConverter")) {
-			Converter<?,?> converter = (Converter<?, ?>) this.applicationContext.getBean("spelConverter");
-			cs.addConverter(converter);
-		}
-
-		if (this.applicationContext.getEnvironment() instanceof ConfigurableEnvironment) {
-			// override the bindings store with the environment-initializing version if in
-			// a Spring context
-			Map<String, BindingProperties> delegate = new TreeMap<String, BindingProperties>(
-					String.CASE_INSENSITIVE_ORDER);
-			delegate.putAll(this.bindings);
-			this.bindings = new EnvironmentEntryInitializingTreeMap<>(this.applicationContext.getEnvironment(),
-					BindingProperties.class, "spring.cloud.stream.default", delegate,
-					IntegrationUtils.getConversionService(this.applicationContext.getBeanFactory()));
-		}
-	}
-
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.conversionService == null) {
-			this.conversionService = this.applicationContext.getBean(
-					IntegrationUtils.INTEGRATION_CONVERSION_SERVICE_BEAN_NAME,
-					ConversionService.class);
-		}
 	}
 
 	public String getBinder(String bindingName) {

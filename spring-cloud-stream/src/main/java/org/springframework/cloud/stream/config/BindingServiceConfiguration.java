@@ -226,4 +226,10 @@ public class BindingServiceConfiguration {
 		};
 	}
 
+	@Bean
+	BindingServicePropertyDefaultBindHandlerAdvisor bindingServicePropertyDefaultBindHandlerAdvisor() {
+		return new BindingServicePropertyDefaultBindHandlerAdvisor();
+	}
+
+
 }
